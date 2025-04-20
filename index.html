@@ -1,70 +1,85 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Cantinho do Pet - Agendamentos</title>
-  <link rel="manifest" href="agendamentos/manifest.json" />
+  <meta name="description" content="Sistema de agendamentos para petshop e clínica veterinária">
+  
+  <!-- Manifest e Favicon -->
+  <link rel="manifest" href="agendamentos/manifest.json">
   <link rel="icon" href="agendamentos/assets/logo/WhatsApp Image 2025-04-18 at 15.16.34.jpeg">
-  <link rel="stylesheet" href="agendamentos/styles.css" />
+  
+  <!-- CSS Local -->
+  <link rel="stylesheet" href="agendamentos/styles.css">
   
   <!-- Fontes Google -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <!-- Adicione isso junto com os outros links de fontes -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
   
   <!-- CSS Externos -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fullcalendar/core/main.min.css" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-  <link rel="manifest" href="/cantinho-do-pet/agendamentos/manifest.json">
-  <link rel="icon" href="assets/icons/favicon.ico" type="image/x-icon">
-  <link rel="icon" type="image/png" href="agendamentos/icons/icon-96x96.png" sizes="96x96" />
-<link rel="icon" type="image/svg+xml" href="agendamentos/icons/favicon.svg" />
-<link rel="shortcut icon" href="agendamentos/icons/favicon.ico" />
-<link rel="apple-touch-icon" sizes="180x180" href="agendamentos/icons/apple-touch-icon.png" />
-<meta name="apple-mobile-web-app-title" content="Cantinho do Pet" />
-<link rel="manifest" href="agendamentos/manifest.json" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fullcalendar/core/main.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Opcional: Tema escuro para Bootstrap -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-dark-5@1.1.3/dist/css/bootstrap-night.min.css" rel="stylesheet" media="(prefers-color-scheme: dark)">
 </head>
+
 <body>
+  <!-- Navbar -->
   <nav class="navbar navbar-expand-lg navbar-light bg-light px-4">
-    <a class="navbar-brand d-flex align-items-center" href="#">
-      <img src="agendamentos/assets/logo/WhatsApp Image 2025-04-18 at 15.16.34.jpeg" alt="Logo Cantinho do Pet" width="40">
-      <span class="fw-bold ms-2">Cantinho do Pet</span>
-    </a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav ms-auto">
-        <li class="nav-item">
-          <a class="nav-link" href="#form-agendamento"><i class="fas fa-plus-circle me-1"></i> Novo Agendamento</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#calendario"><i class="fas fa-calendar-alt me-1"></i> Agenda</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#agendamentos-lista"><i class="fas fa-list me-1"></i> Agendamentos</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#" onclick="gerarRelatorioPDF()"><i class="fas fa-file-pdf me-1"></i> Relatório</a>
-        </li>
-      </ul>
+    <div class="container-fluid">
+      <a class="navbar-brand d-flex align-items-center" href="#">
+        <img src="agendamentos/assets/logo/WhatsApp Image 2025-04-18 at 15.16.34.jpeg" alt="Logo Cantinho do Pet" width="40">
+        <span class="fw-bold ms-2">Cantinho do Pet</span>
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="#form-section"><i class="fas fa-plus-circle me-1"></i> Novo Agendamento</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#calendario"><i class="fas fa-calendar-alt me-1"></i> Agenda</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#agendamentos-lista"><i class="fas fa-list me-1"></i> Agendamentos</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#" onclick="gerarRelatorioPDF()"><i class="fas fa-file-pdf me-1"></i> Relatório</a>
+          </li>
+        </ul>
+      </div>
     </div>
   </nav>
 
+
+  <nav class="navbar navbar-expand-lg navbar-light bg-light px-4">
+    <div class="container-fluid">
+      <!-- Logo e outros itens existentes... -->
+      
+      <div class="d-flex align-items-center">
+        <button id="theme-toggle" class="btn btn-sm btn-outline-secondary ms-2">
+          <i class="fas fa-moon"></i> Modo Escuro
+        </button>
+      </div>
+    </div>
+  </nav>
+
+
+  <!-- Conteúdo Principal -->
   <main class="container my-5">
-    <section id="form-agendamento" class="mb-5 p-4 bg-light rounded shadow-sm">
+    <!-- Seção do Formulário -->
+    <section id="form-section" class="mb-5 p-4 bg-light rounded shadow-sm">
       <h3 id="form-title" class="mb-4">Novo Agendamento</h3>
       <form id="form-agendamento" novalidate>
         <div class="row g-3">
           <div class="col-md-6">
             <label class="form-label">Nome do Cliente <span class="text-danger">*</span></label>
-            <input type="text" class="form-control" id="nomeCliente" required />
+            <input type="text" class="form-control" id="nomeCliente" required>
             <div class="invalid-feedback">Por favor, informe o nome do cliente</div>
           </div>
           
@@ -86,35 +101,40 @@
           
           <div class="col-md-4">
             <label class="form-label">Data <span class="text-danger">*</span></label>
-            <input type="date" class="form-control" id="data" required />
+            <input type="date" class="form-control" id="data" required>
             <div class="invalid-feedback">Por favor, informe a data</div>
           </div>
+          
           <div class="col-md-4">
             <label class="form-label">Horário <span class="text-danger">*</span></label>
-            <input type="time" class="form-control" id="horario" required />
+            <input type="time" class="form-control" id="horario" required>
             <div class="invalid-feedback">Por favor, informe o horário</div>
           </div>
+          
           <div class="col-md-4">
             <label class="form-label">Valor Total (R$) <span class="text-danger">*</span></label>
-            <input type="number" class="form-control" id="valor" min="0.01" step="0.01" required readonly />
+            <input type="number" class="form-control" id="valor" min="0.01" step="0.01" required readonly>
             <div class="invalid-feedback">Por favor, informe um valor válido</div>
           </div>
+          
           <div class="col-12">
             <label class="form-label">Observações</label>
             <textarea class="form-control" id="observacoes" rows="3"></textarea>
           </div>
-        </div>
-        <div class="mt-3">
-          <button type="submit" class="btn btn-primary">
-            <i class="fas fa-save me-1"></i> Salvar Agendamento
-          </button>
-          <button type="button" id="cancel-edit" class="btn btn-secondary d-none ms-2">
-            <i class="fas fa-times me-1"></i> Cancelar Edição
-          </button>
+          
+          <div class="col-12 mt-3">
+            <button type="submit" class="btn btn-primary">
+              <i class="fas fa-save me-1"></i> Salvar Agendamento
+            </button>
+            <button type="button" id="cancel-edit" class="btn btn-secondary d-none ms-2">
+              <i class="fas fa-times me-1"></i> Cancelar Edição
+            </button>
+          </div>
         </div>
       </form>
     </section>
 
+    <!-- Seção de Visualização -->
     <div class="d-flex justify-content-between align-items-center mb-4">
       <h3>Visualização de Agendamentos</h3>
       <button class="btn btn-success" onclick="gerarRelatorioPDF()">
@@ -122,8 +142,10 @@
       </button>
     </div>
 
+    <!-- Calendário -->
     <div id="calendario" class="mb-5"></div>
 
+    <!-- Lista de Agendamentos -->
     <section class="mt-5">
       <h4 class="mb-4">Lista de Agendamentos</h4>
       <ul id="agendamentos-lista" class="list-group"></ul>
@@ -149,27 +171,23 @@
     </div>
   </div>
 
-  <!-- ... (código anterior permanece igual) -->
-
-<!-- Modal de Erro (adicione este novo modal) -->
-<div class="modal fade" id="errorModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog">
+  <!-- Modal de Erro -->
+  <div class="modal fade" id="errorModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
       <div class="modal-content">
-          <div class="modal-header bg-danger text-white">
-              <h5 class="modal-title" id="errorModalTitle">Erro</h5>
-              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body" id="errorModalBody">
-              <!-- Mensagem de erro será inserida aqui -->
-          </div>
-          <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
-          </div>
+        <div class="modal-header bg-danger text-white">
+          <h5 class="modal-title" id="errorModalTitle">Erro</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body" id="errorModalBody">
+          <!-- Mensagem de erro será inserida aqui -->
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+        </div>
       </div>
+    </div>
   </div>
-</div>
-
-<!-- ... (código posterior permanece igual) -->
 
   <!-- Modal de Comprovante -->
   <div class="modal fade" id="comprovanteModal" tabindex="-1" aria-hidden="true">
@@ -192,6 +210,7 @@
     </div>
   </div>
 
+  <!-- Footer -->
   <footer class="text-white text-center py-5 mt-5">
     <div class="waves"></div>
     <div class="footer-content container">
@@ -214,7 +233,7 @@
       </div>
 
       <div class="dev-credits mt-5 pt-3 border-top border-light">
-        <p class="mb-1">Desenvolvido com ❤️ por FrogProgramer</p>
+        <p class="mb-1">Desenvolvido com ❤️ por</p>
         <a href="https://seusite.com" target="_blank" class="dev-signature">
           <img src="agendamentos/assets/logo/frogCircular2025-03-31 at 13.21.17.jpeg" alt="Assinatura do Desenvolvedor" height="30">
         </a>
@@ -229,21 +248,21 @@
   <script src="https://cdn.jsdelivr.net/npm/localforage@1.10.0/dist/localforage.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
-  <script src="/cantinho-do-pet/agendamentos/app.js"></script>
 
   <!-- Scripts Locais -->
   <script src="agendamentos/app.js"></script>
   <script src="agendamentos/relatorio.js"></script>
 
+  <!-- Inicialização -->
   <script>
     // Registro do Service Worker
     if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/cantinho-do-pet/service-worker.js')
-        .then(reg => console.log('✅ Service Worker registrado!'))
-        .catch(err => console.log('❌ Erro no Service Worker:', err));
-    });
-  }
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service-worker.js')
+          .then(reg => console.log('Service Worker registrado:', reg))
+          .catch(err => console.error('Erro ao registrar Service Worker:', err));
+      });
+    }
 
     // Configuração inicial dos eventos
     document.addEventListener('DOMContentLoaded', function() {
@@ -304,45 +323,5 @@
       }
     });
   </script>
-
-<!-- Botão de Toggle para Modo Claro/Escuro -->
-<div class="theme-switcher">
-  <button id="themeToggle" class="btn btn-sm btn-outline-secondary">
-    <i class="fas fa-moon"></i> Modo Escuro
-  </button>
-</div>
-
-<script>
-  // Controle do Tema
-  document.addEventListener('DOMContentLoaded', function() {
-    const themeToggle = document.getElementById('themeToggle');
-    const icon = themeToggle.querySelector('i');
-    
-    // Verifica o tema salvo ou preferência do sistema
-    const savedTheme = localStorage.getItem('theme') || 
-                      (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-    
-    // Aplica o tema salvo
-    document.body.classList.toggle('dark-theme', savedTheme === 'dark');
-    updateButtonText(themeToggle, icon, savedTheme);
-
-    // Evento de clique para alternar
-    themeToggle.addEventListener('click', function() {
-      document.body.classList.toggle('dark-theme');
-      const isDark = document.body.classList.contains('dark-theme');
-      localStorage.setItem('theme', isDark ? 'dark' : 'light');
-      updateButtonText(themeToggle, icon, isDark ? 'dark' : 'light');
-    });
-
-    function updateButtonText(button, icon, theme) {
-      if (theme === 'dark') {
-        button.innerHTML = '<i class="fas fa-sun"></i> Modo Claro';
-      } else {
-        button.innerHTML = '<i class="fas fa-moon"></i> Modo Escuro';
-      }
-    }
-  });
-</script>
-
 </body>
 </html>

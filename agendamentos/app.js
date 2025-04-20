@@ -1,10 +1,11 @@
 /**
  * app.js - Sistema de Agendamentos Cantinho do Pet
- * Versão corrigida com tratamento de erros aprimorado
+ * Versão com modo claro/escuro
  * Últimas atualizações:
- * - Correção nas mensagens de confirmação de agendamento
- * - Melhor tratamento de erros
- * - Validação de conflitos de horário
+ * - Adição de tema claro/escuro
+ * - Persistência de preferência de tema
+ * - Integração com preferência do sistema
+ * - Melhorias na organização do código
  */
 
 // Variáveis globais
@@ -15,19 +16,64 @@ let currentEditId = null;
 let agendamentoAtual = null;
 
 // Inicialização quando o DOM estiver carregado
-document.addEventListener('DOMContentLoaded', async function () {
+document.addEventListener('DOMContentLoaded', async function() {
     await inicializarCalendario();
     configurarFormulario();
     configurarEventosUI();
     configurarServicosMultiplos();
+    configurarTema(); // Nova função para configurar tema
     await atualizarInterface();
 });
+
+// Configuração do tema claro/escuro
+function configurarTema() {
+    const themeToggle = document.getElementById('theme-toggle');
+    const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+    
+    // Verifica preferência armazenada ou do sistema
+    const currentTheme = localStorage.getItem('theme') || 
+                       (prefersDarkScheme.matches ? 'dark' : 'light');
+    
+    // Aplica o tema inicial
+    if (currentTheme === 'dark') {
+        document.body.classList.add('dark-mode');
+        themeToggle.innerHTML = '<i class="fas fa-sun"></i> Modo Claro';
+    }
+    
+    // Alterna entre temas
+    themeToggle.addEventListener('click', function() {
+        const isDark = document.body.classList.toggle('dark-mode');
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        themeToggle.innerHTML = isDark 
+            ? '<i class="fas fa-sun"></i> Modo Claro' 
+            : '<i class="fas fa-moon"></i> Modo Escuro';
+        
+        // Atualiza o calendário se existir
+        if (calendar) {
+            calendar.render();
+        }
+    });
+    
+    // Atualiza o tema se a preferência do sistema mudar
+    prefersDarkScheme.addListener(e => {
+        const newTheme = e.matches ? 'dark' : 'light';
+        localStorage.setItem('theme', newTheme);
+        if (newTheme === 'dark') {
+            document.body.classList.add('dark-mode');
+            themeToggle.innerHTML = '<i class="fas fa-sun"></i> Modo Claro';
+        } else {
+            document.body.classList.remove('dark-mode');
+            themeToggle.innerHTML = '<i class="fas fa-moon"></i> Modo Escuro';
+        }
+    });
+}
 
 // Inicializa o calendário FullCalendar
 async function inicializarCalendario() {
     calendar = new FullCalendar.Calendar(document.getElementById('calendario'), {
         initialView: 'dayGridMonth',
         locale: 'pt-br',
+        themeSystem: 'bootstrap5',
         headerToolbar: {
             left: 'prev,next today',
             center: 'title',
@@ -538,49 +584,25 @@ window.editarAgendamento = async function(id) {
     }
 };
 
-// CONTROLE PARA O MODO ESCURO
-
-async function atualizarInterface() {
-    try {
-        // Verificar e aplicar tema ao carregar
-        const savedTheme = localStorage.getItem('theme') || 
-                         (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-        document.body.classList.toggle('dark-theme', savedTheme === 'dark');
-        
-        // Restante da função original...
-        agendamentos = await carregarAgendamentos();
-        
-        calendar.removeAllEvents();
-        const eventosCalendario = await carregarAgendamentosParaCalendario();
-        calendar.addEventSource(eventosCalendario);
-        
-        const listaEl = document.getElementById('agendamentos-lista');
-        listaEl.innerHTML = agendamentos.map(a => criarItemLista(a)).join('');
-    } catch (error) {
-        console.error('Erro ao atualizar interface:', error);
-        mostrarAlerta('Erro!', 'Não foi possível carregar os agendamentos', 'error');
-    }
-}
-
-
-// No final do app.js
+// Instalação PWA
 let deferredPrompt;
 
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   deferredPrompt = e;
   
+  // Mostrar botão de instalação (opcional)
   const installBtn = document.createElement('button');
-  installBtn.textContent = '📲 Instalar App';
-  installBtn.className = 'install-btn';
-  installBtn.onclick = () => {
+  installBtn.textContent = 'Instalar App';
+  installBtn.className = 'btn btn-primary';
+  installBtn.addEventListener('click', () => {
     deferredPrompt.prompt();
-    deferredPrompt.userChoice.then((choice) => {
-      if (choice.outcome === 'accepted') {
-        console.log('Usuário instalou o app!');
+    deferredPrompt.userChoice.then((choiceResult) => {
+      if (choiceResult.outcome === 'accepted') {
+        console.log('Usuário aceitou a instalação');
       }
       deferredPrompt = null;
     });
-  };
+  });
   document.body.appendChild(installBtn);
 });
