@@ -295,5 +295,45 @@
       }
     });
   </script>
+
+<!-- Botão de Toggle para Modo Claro/Escuro -->
+<div class="theme-switcher">
+  <button id="themeToggle" class="btn btn-sm btn-outline-secondary">
+    <i class="fas fa-moon"></i> Modo Escuro
+  </button>
+</div>
+
+<script>
+  // Controle do Tema
+  document.addEventListener('DOMContentLoaded', function() {
+    const themeToggle = document.getElementById('themeToggle');
+    const icon = themeToggle.querySelector('i');
+    
+    // Verifica o tema salvo ou preferência do sistema
+    const savedTheme = localStorage.getItem('theme') || 
+                      (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    
+    // Aplica o tema salvo
+    document.body.classList.toggle('dark-theme', savedTheme === 'dark');
+    updateButtonText(themeToggle, icon, savedTheme);
+
+    // Evento de clique para alternar
+    themeToggle.addEventListener('click', function() {
+      document.body.classList.toggle('dark-theme');
+      const isDark = document.body.classList.contains('dark-theme');
+      localStorage.setItem('theme', isDark ? 'dark' : 'light');
+      updateButtonText(themeToggle, icon, isDark ? 'dark' : 'light');
+    });
+
+    function updateButtonText(button, icon, theme) {
+      if (theme === 'dark') {
+        button.innerHTML = '<i class="fas fa-sun"></i> Modo Claro';
+      } else {
+        button.innerHTML = '<i class="fas fa-moon"></i> Modo Escuro';
+      }
+    }
+  });
+</script>
+
 </body>
 </html>

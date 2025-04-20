@@ -559,3 +559,27 @@ window.addEventListener('beforeinstallprompt', (e) => {
   });
   document.body.appendChild(installBtn);
 });
+
+// CONTROLE PARA O MODO ESCURO
+
+async function atualizarInterface() {
+    try {
+        // Verificar e aplicar tema ao carregar
+        const savedTheme = localStorage.getItem('theme') || 
+                         (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.body.classList.toggle('dark-theme', savedTheme === 'dark');
+        
+        // Restante da função original...
+        agendamentos = await carregarAgendamentos();
+        
+        calendar.removeAllEvents();
+        const eventosCalendario = await carregarAgendamentosParaCalendario();
+        calendar.addEventSource(eventosCalendario);
+        
+        const listaEl = document.getElementById('agendamentos-lista');
+        listaEl.innerHTML = agendamentos.map(a => criarItemLista(a)).join('');
+    } catch (error) {
+        console.error('Erro ao atualizar interface:', error);
+        mostrarAlerta('Erro!', 'Não foi possível carregar os agendamentos', 'error');
+    }
+}

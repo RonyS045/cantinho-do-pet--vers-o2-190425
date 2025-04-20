@@ -658,3 +658,86 @@ footer {
   h2 { font-size: 1.4rem; }
   h3 { font-size: 1.2rem; }
 }
+
+
+/* ===== TEMA ESCURO ===== */
+.dark-theme {
+  --primary-color: #4CAF50;
+  --secondary-color: #9c27b0;
+  --accent-color: #2196F3;
+  --text-color: #f5f5f5;
+  --text-light: #121212;
+  --text-muted: #b0b0b0;
+  --border-color: #444;
+  --light-color: #121212;
+  --dark-color: #f8f9fa;
+  background-color: #121212;
+  color: #f5f5f5;
+}
+
+.dark-theme #form-agendamento,
+.dark-theme .list-group-item,
+.dark-theme #calendario,
+.dark-theme .modal-content,
+.dark-theme .comprovante {
+  background-color: #1e1e1e;
+  color: #f5f5f5;
+  border-color: var(--border-color);
+}
+
+.dark-theme .form-control,
+.dark-theme .form-select,
+.dark-theme .input-group-text {
+  background-color: #2d2d2d;
+  color: #f5f5f5;
+  border-color: #444;
+}
+
+.dark-theme .navbar {
+  background-color: #1a1a1a !important;
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.3);
+}
+
+.dark-theme .nav-link {
+  color: #e0e0e0 !important;
+}
+
+.dark-theme .fc-event {
+  background-color: var(--secondary-color);
+  color: white;
+}
+
+.dark-theme .alert-light {
+  background-color: #2d2d2d;
+  color: #f5f5f5;
+}
+
+/* Estilo do botão de tema */
+.theme-switcher {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+}
+
+#themeToggle {
+  border-radius: 50px;
+  padding: 8px 15px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+}
+
+.dark-theme #themeToggle {
+  background-color: #333;
+  color: #fff;
+}
+
+/* Ajustes para o calendário no modo escuro */
+.dark-theme .fc .fc-toolbar-title,
+.dark-theme .fc-col-header-cell-cushion {
+  color: #f5f5f5;
+}
+
+.dark-theme .fc .fc-daygrid-day-frame {
+  background-color: #1e1e1e;
+}
