@@ -13,6 +13,12 @@
   --border-color: #e0e0e0;          /* Cor para bordas */
   --success-light: #d4edda;         /* Verde claro para sucesso */
   --gold-color: #FFD700;            /* Dourado para destaques */
+
+  /* Novas variáveis de fonte */
+  --font-primary: 'Playfair Display', serif;
+  --font-secondary: 'Poppins', sans-serif;
+  --font-accent: 'DM Sans', sans-serif;
+  --font-ui: 'Montserrat', sans-serif;
 }
 
 /* ===== ESTILOS GERAIS ===== */
@@ -23,7 +29,7 @@
 }
 
 body {
-  font-family: 'Poppins', sans-serif;
+  font-family: var(--font-secondary);
   background-color: #fdfdfd;
   color: var(--text-color);
   line-height: 1.6;
@@ -33,14 +39,29 @@ body {
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: 'Montserrat', sans-serif;
+  font-family: var(--font-primary);
   font-weight: 600;
+  letter-spacing: -0.3px;
   color: var(--secondary-color);
+  line-height: 1.3;
 }
+
+h1 { font-size: 2.5rem; margin-bottom: 1.5rem; }
+h2 { font-size: 2rem; margin-bottom: 1.25rem; }
+h3 { font-size: 1.75rem; margin-bottom: 1rem; }
+h4 { font-size: 1.5rem; margin-bottom: 0.75rem; }
+h5 { font-size: 1.25rem; margin-bottom: 0.5rem; }
+h6 { font-size: 1.1rem; margin-bottom: 0.5rem; }
 
 a {
   text-decoration: none;
   transition: all 0.3s ease;
+  color: var(--secondary-color);
+}
+
+p, li, td, th {
+  line-height: 1.6;
+  letter-spacing: 0.1px;
 }
 
 /* ===== NAVBAR ===== */
@@ -51,14 +72,17 @@ a {
   top: 0;
   z-index: 1000;
   padding: 0.8rem 1rem;
+  font-family: var(--font-ui);
 }
 
 .navbar-brand {
   font-weight: 700;
-  font-size: 1.2rem;
+  font-size: 1.3rem;
   color: var(--secondary-color) !important;
   display: flex;
   align-items: center;
+  font-family: var(--font-primary);
+  letter-spacing: 0.5px;
 }
 
 .navbar-brand img {
@@ -79,6 +103,7 @@ a {
   margin: 0 0.2rem;
   display: flex;
   align-items: center;
+  font-family: var(--font-ui);
 }
 
 .nav-link:hover {
@@ -108,6 +133,7 @@ a {
   font-weight: 500;
   margin-bottom: 0.5rem;
   display: block;
+  font-family: var(--font-ui);
 }
 
 .form-control, .form-select {
@@ -117,6 +143,7 @@ a {
   transition: all 0.3s;
   width: 100%;
   font-size: 1rem;
+  font-family: var(--font-secondary);
 }
 
 .form-control:focus, .form-select:focus {
@@ -138,6 +165,7 @@ a {
   font-size: 0.85rem;
   margin-top: 0.25rem;
   display: block;
+  font-family: var(--font-secondary);
 }
 
 /* ===== SERVIÇOS MÚLTIPLOS ===== */
@@ -176,6 +204,7 @@ a {
   display: inline-flex;
   align-items: center;
   padding: 0.4rem 0.8rem;
+  font-family: var(--font-ui);
 }
 
 #add-servico i {
@@ -185,7 +214,7 @@ a {
 /* ===== BOTÕES ===== */
 .btn {
   padding: 0.6rem 1.2rem;
-  font-weight: 500;
+  font-weight: 600;
   transition: all 0.3s;
   border-radius: 6px;
   display: inline-flex;
@@ -193,6 +222,8 @@ a {
   justify-content: center;
   border: none;
   cursor: pointer;
+  font-family: var(--font-ui);
+  letter-spacing: 0.3px;
 }
 
 .btn i {
@@ -265,12 +296,14 @@ a {
   margin-bottom: 1.5rem;
   flex-wrap: wrap;
   gap: 1rem;
+  font-family: var(--font-ui);
 }
 
 .fc .fc-toolbar-title {
   font-size: 1.4rem;
   color: var(--secondary-color);
   font-weight: 600;
+  font-family: var(--font-primary);
 }
 
 .fc .fc-button {
@@ -278,6 +311,7 @@ a {
   background-color: var(--primary-color);
   border-color: var(--primary-color);
   font-weight: 500;
+  font-family: var(--font-ui);
 }
 
 .fc .fc-button:hover {
@@ -293,6 +327,7 @@ a {
   cursor: pointer;
   transition: all 0.2s;
   border-radius: 4px;
+  font-family: var(--font-secondary);
 }
 
 .fc-event:hover {
@@ -320,6 +355,8 @@ a {
   color: var(--secondary-color);
   font-weight: 600;
   font-size: 1.1rem;
+  font-family: var(--font-primary);
+  letter-spacing: -0.2px;
 }
 
 .list-group-item small {
@@ -327,11 +364,13 @@ a {
   font-size: 0.9rem;
   display: block;
   margin-top: 0.2rem;
+  font-family: var(--font-secondary);
 }
 
 .list-group-item ul {
   padding-left: 1.5rem;
   margin: 0.5rem 0;
+  font-family: var(--font-secondary);
 }
 
 .list-group-item em {
@@ -351,17 +390,19 @@ a {
 .modal-title {
   color: var(--secondary-color);
   font-weight: 600;
+  font-family: var(--font-primary);
+  letter-spacing: -0.3px;
 }
 
 .modal-body {
   padding: 1.5rem;
+  font-family: var(--font-secondary);
 }
 
 .modal-footer {
   border-top: 1px solid var(--border-color);
   padding: 1rem 1.5rem;
 }
-
 
 /* Estilos para o modal de erro */
 #errorModal .modal-header {
@@ -372,32 +413,14 @@ a {
   color: white;
 }
 
-/* Melhoria nos inputs inválidos */
-.is-invalid {
-  border-color: var(--danger-color) !important;
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e");
-  background-repeat: no-repeat;
-  background-position: right calc(0.375em + 0.1875rem) center;
-  background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
-}
-
-.invalid-feedback {
-  color: var(--danger-color);
-  font-size: 0.85rem;
-  margin-top: 0.25rem;
-  display: block;
-}
-
-
 /* ===== COMPROVANTE ===== */
 .comprovante {
-  font-family: 'Poppins', sans-serif;
+  font-family: var(--font-accent);
   color: var(--text-color);
 }
 
 .comprovante h4, .comprovante h5, .comprovante h6 {
-  font-family: 'Montserrat', sans-serif;
-  color: var(--secondary-color);
+  font-family: var(--font-primary);
 }
 
 .comprovante h4 {
@@ -438,6 +461,7 @@ a {
   padding: 0.75rem 1rem;
   border-radius: 6px;
   margin-top: 1.5rem;
+  font-family: var(--font-secondary);
 }
 
 .comprovante .text-center img {
@@ -456,6 +480,7 @@ footer {
   position: relative;
   overflow: hidden;
   padding: 3rem 0;
+  font-family: var(--font-accent);
 }
 
 .waves {
@@ -487,6 +512,7 @@ footer {
   font-size: 1.8rem;
   margin-bottom: 1rem;
   text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+  font-family: var(--font-primary);
 }
 
 .footer-content p {
@@ -511,6 +537,7 @@ footer {
   padding: 0.5rem 1rem;
   border-radius: 50px;
   background: rgba(255, 255, 255, 0.1);
+  font-family: var(--font-ui);
 }
 
 .footer-links a:hover {
@@ -567,6 +594,10 @@ footer {
   .navbar-nav {
     margin-top: 1rem;
   }
+
+  h1 { font-size: 2.2rem; }
+  h2 { font-size: 1.8rem; }
+  h3 { font-size: 1.5rem; }
 }
 
 @media (max-width: 768px) {
@@ -594,6 +625,10 @@ footer {
   .valor-servico {
     max-width: 100px;
   }
+
+  h1 { font-size: 2rem; }
+  h2 { font-size: 1.6rem; }
+  h3 { font-size: 1.3rem; }
 }
 
 @media (max-width: 576px) {
@@ -618,4 +653,8 @@ footer {
   .valor-servico {
     max-width: 80px;
   }
+
+  h1 { font-size: 1.8rem; }
+  h2 { font-size: 1.4rem; }
+  h3 { font-size: 1.2rem; }
 }
