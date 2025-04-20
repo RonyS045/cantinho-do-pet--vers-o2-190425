@@ -75,6 +75,14 @@ self.addEventListener('install', (event) => {
   );
 });
 
+
+const ASSETS = [
+  '/cantinho-do-pet/agendamentos/',
+  '/cantinho-do-pet/agendamentos/index.html',
+  // ... outros caminhos absolutos
+];
+
+
 // Ativação do Service Worker
 self.addEventListener('activate', (event) => {
   event.waitUntil(
