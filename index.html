@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cantinho do Pet - Agendamentos</title>
+  <link rel="manifest" href="agendamentos/manifest.json" />
+  <link rel="icon" href="agendamentos/assets/logo/WhatsApp Image 2025-04-18 at 15.16.34.jpeg">
+  <link rel="stylesheet" href="styles.css" />
+  
+  <!-- Fontes Google -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- CSS Externos -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fullcalendar/core/main.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-light bg-light px-4">
+    <a class="navbar-brand d-flex align-items-center" href="#">
+      <img src="agendamentos/assets/logo/WhatsApp Image 2025-04-18 at 15.16.34.jpeg" alt="Logo Cantinho do Pet" width="40">
+      <span class="fw-bold ms-2">Cantinho do Pet</span>
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item">
+          <a class="nav-link" href="#form-agendamento"><i class="fas fa-plus-circle me-1"></i> Novo Agendamento</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#calendario"><i class="fas fa-calendar-alt me-1"></i> Agenda</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#agendamentos-lista"><i class="fas fa-list me-1"></i> Agendamentos</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#" onclick="gerarRelatorioPDF()"><i class="fas fa-file-pdf me-1"></i> Relatório</a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <main class="container my-5">
+    <section id="form-agendamento" class="mb-5 p-4 bg-light rounded shadow-sm">
+      <h3 id="form-title" class="mb-4">Novo Agendamento</h3>
+      <form id="form-agendamento" novalidate>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label">Nome do Cliente <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" id="nomeCliente" required />
+            <div class="invalid-feedback">Por favor, informe o nome do cliente</div>
+          </div>
+          
+          <div class="col-md-6">
+            <label class="form-label">Serviços <span class="text-danger">*</span></label>
+            <div id="servicos-container">
+              <div class="input-group mb-2">
+                <input type="text" class="form-control servico-input" placeholder="Nome do serviço" required>
+                <input type="number" class="form-control valor-servico" placeholder="Valor (R$)" min="0" step="0.01" required>
+                <button type="button" class="btn btn-outline-danger remove-servico" disabled>
+                  <i class="fas fa-times"></i>
+                </button>
+              </div>
+            </div>
+            <button type="button" id="add-servico" class="btn btn-sm btn-outline-primary mt-2">
+              <i class="fas fa-plus me-1"></i> Adicionar outro serviço
+            </button>
+          </div>
+          
+          <div class="col-md-4">
+            <label class="form-label">Data <span class="text-danger">*</span></label>
+            <input type="date" class="form-control" id="data" required />
+            <div class="invalid-feedback">Por favor, informe a data</div>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Horário <span class="text-danger">*</span></label>
+            <input type="time" class="form-control" id="horario" required />
+            <div class="invalid-feedback">Por favor, informe o horário</div>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Valor Total (R$) <span class="text-danger">*</span></label>
+            <input type="number" class="form-control" id="valor" min="0.01" step="0.01" required readonly />
+            <div class="invalid-feedback">Por favor, informe um valor válido</div>
+          </div>
+          <div class="col-12">
+            <label class="form-label">Observações</label>
+            <textarea class="form-control" id="observacoes" rows="3"></textarea>
+          </div>
+        </div>
+        <div class="mt-3">
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-save me-1"></i> Salvar Agendamento
+          </button>
+          <button type="button" id="cancel-edit" class="btn btn-secondary d-none ms-2">
+            <i class="fas fa-times me-1"></i> Cancelar Edição
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h3>Visualização de Agendamentos</h3>
+      <button class="btn btn-success" onclick="gerarRelatorioPDF()">
+        <i class="fas fa-file-pdf me-1"></i> Gerar Relatório PDF
+      </button>
+    </div>
+
+    <div id="calendario" class="mb-5"></div>
+
+    <section class="mt-5">
+      <h4 class="mb-4">Lista de Agendamentos</h4>
+      <ul id="agendamentos-lista" class="list-group"></ul>
+    </section>
+  </main>
+
+  <!-- Modal de Confirmação -->
+  <div class="modal fade" id="confirmModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header bg-danger text-white">
+          <h5 class="modal-title">Confirmar Exclusão</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          Tem certeza que deseja excluir este agendamento? Esta ação não pode ser desfeita.
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-danger" id="confirmDelete">Confirmar Exclusão</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ... (código anterior permanece igual) -->
+
+<!-- Modal de Erro (adicione este novo modal) -->
+<div class="modal fade" id="errorModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+      <div class="modal-content">
+          <div class="modal-header bg-danger text-white">
+              <h5 class="modal-title" id="errorModalTitle">Erro</h5>
+              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body" id="errorModalBody">
+              <!-- Mensagem de erro será inserida aqui -->
+          </div>
+          <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+          </div>
+      </div>
+  </div>
+</div>
+
+<!-- ... (código posterior permanece igual) -->
+
+  <!-- Modal de Comprovante -->
+  <div class="modal fade" id="comprovanteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header bg-success text-white">
+          <h5 class="modal-title">Comprovante de Agendamento</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body" id="comprovante-content">
+          <!-- Conteúdo será preenchido via JavaScript -->
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+          <button type="button" id="share-whatsapp" class="btn btn-success">
+            <i class="fab fa-whatsapp me-1"></i> Compartilhar via WhatsApp
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="text-white text-center py-5 mt-5">
+    <div class="waves"></div>
+    <div class="footer-content container">
+      <h5 class="mb-3" style="color: #FFD700;">CANTINHO DO PET</h5>
+      <p class="mb-4">Seu parceiro de confiança para o cuidado com os pets.</p>
+      
+      <div class="footer-links mt-3">
+        <a href="mailto:contato@cantinhodopet.com" class="text-white mx-2">
+          <i class="fas fa-envelope me-1"></i> cantinhodopet.vet
+        </a>
+        <a href="tel:+553199894-6691" class="text-white mx-2">
+          <i class="fas fa-phone me-1"></i> (31) 99894-6691
+        </a>
+        <a href="https://www.instagram.com/cantinhodopet.vet?igsh=NTc4MTIwNjQ2YQ==" target="_blank" class="text-white mx-2">
+          <i class="fab fa-instagram me-1"></i> cantinhodopet.vet
+        </a>
+        <a href="https://wa.me/553199894-6691" target="_blank" class="text-white mx-2">
+          <i class="fab fa-whatsapp me-1"></i> WhatsApp
+        </a>
+      </div>
+
+      <div class="dev-credits mt-5 pt-3 border-top border-light">
+        <p class="mb-1">Desenvolvido com ❤️ por</p>
+        <a href="https://seusite.com" target="_blank" class="dev-signature">
+          <img src="/assets/dev-logo.png" alt="Assinatura do Desenvolvedor" height="30">
+        </a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts Externos -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdn.jsdelivr.net/npm/localforage@1.10.0/dist/localforage.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+
+  <!-- Scripts Locais -->
+  <script src="app.js"></script>
+  <script src="agendamentos/relatorio.js"></script>
+
+  <script>
+    // Registro do Service Worker
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service-worker.js')
+          .then(reg => console.log('Service Worker registrado:', reg))
+          .catch(err => console.error('Erro ao registrar Service Worker:', err));
+      });
+    }
+
+    // Configuração inicial dos eventos
+    document.addEventListener('DOMContentLoaded', function() {
+      // Configura eventos para os serviços
+      const servicosContainer = document.getElementById('servicos-container');
+      
+      servicosContainer.addEventListener('input', function(e) {
+        if (e.target.classList.contains('servico-input') || 
+            e.target.classList.contains('valor-servico')) {
+          calcularValorTotal();
+        }
+      });
+      
+      servicosContainer.addEventListener('click', function(e) {
+        if (e.target.classList.contains('remove-servico')) {
+          e.target.closest('.input-group').remove();
+          atualizarBotoesRemover();
+          calcularValorTotal();
+        }
+      });
+      
+      // Botão para adicionar novo serviço
+      document.getElementById('add-servico').addEventListener('click', function() {
+        const novoServico = `
+          <div class="input-group mb-2">
+            <input type="text" class="form-control servico-input" placeholder="Nome do serviço" required>
+            <input type="number" class="form-control valor-servico" placeholder="Valor (R$)" min="0" step="0.01" required>
+            <button type="button" class="btn btn-outline-danger remove-servico">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+        `;
+        servicosContainer.insertAdjacentHTML('beforeend', novoServico);
+        atualizarBotoesRemover();
+      });
+      
+      // Função para calcular valor total
+      function calcularValorTotal() {
+        const servicosInputs = Array.from(document.querySelectorAll('.servico-input'));
+        const valoresInputs = Array.from(document.querySelectorAll('.valor-servico'));
+        
+        let total = 0;
+        servicosInputs.forEach((input, index) => {
+          if (input.value && valoresInputs[index].value) {
+            total += parseFloat(valoresInputs[index].value) || 0;
+          }
+        });
+        
+        document.getElementById('valor').value = total.toFixed(2);
+      }
+      
+      // Função para atualizar botões de remover
+      function atualizarBotoesRemover() {
+        const botoes = document.querySelectorAll('.remove-servico');
+        botoes.forEach((btn, index) => {
+          btn.disabled = index === 0;
+        });
+      }
+    });
+  </script>
+</body>
+</html>
