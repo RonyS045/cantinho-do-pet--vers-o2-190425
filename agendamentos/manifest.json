@@ -2,11 +2,12 @@
   "name": "Cantinho do Pet - Agendamentos",
   "short_name": "Cantinho Pet",
   "description": "Sistema de agendamentos para petshop e clínica veterinária",
-  "start_url": "/index.html",
+  "start_url": "/cantinho-do-pet/agendamentos/index.html",
+  "scope": "/cantinho-do-pet/agendamentos/",
   "display": "standalone",
+  "orientation": "portrait-primary",
   "background_color": "#FFFFFF",
   "theme_color": "#6A11CB",
-  "orientation": "portrait-primary",
   "icons": [
     {
       "src": "icons/icon-72x72.png",
@@ -62,55 +63,30 @@
       "src": "screenshots/screenshot1.webp",
       "sizes": "1280x720",
       "type": "image/webp",
-      "description": "Tela principal do sistema de agendamentos"
+      "description": "Tela principal do sistema"
     },
     {
       "src": "screenshots/screenshot2.webp",
       "sizes": "1280x720",
       "type": "image/webp",
-      "description": "Formulário de novo agendamento"
+      "description": "Formulário de agendamento"
     }
   ],
   "categories": ["business", "health", "lifestyle"],
   "lang": "pt-BR",
   "dir": "ltr",
-  "related_applications": [
-    {
-      "platform": "webapp",
-      "url": "https://cantinhodopet.com/manifest.json"
-    }
-  ],
-  "prefer_related_applications": false,
   "shortcuts": [
     {
       "name": "Novo Agendamento",
       "short_name": "Agendar",
-      "description": "Criar um novo agendamento",
-      "url": "/index.html#form-agendamento",
+      "description": "Criar novo agendamento",
+      "url": "/cantinho-do-pet/agendamentos/#form-agendamento",
       "icons": [
         {
           "src": "icons/shortcut-icon-96x96.png",
           "sizes": "96x96"
         }
       ]
-    },
-    {
-      "name": "Ver Calendário",
-      "short_name": "Calendário",
-      "description": "Visualizar agenda de atendimentos",
-      "url": "/index.html#calendario",
-      "icons": [
-        {
-          "src": "icons/shortcut-icon-96x96.png",
-          "sizes": "96x96"
-        }
-      ]
-    }
-  ],
-  "protocol_handlers": [
-    {
-      "protocol": "web+cantinhodopet",
-      "url": "/index.html?url=%s"
     }
   ],
   "display_override": ["window-controls-overlay", "minimal-ui"],

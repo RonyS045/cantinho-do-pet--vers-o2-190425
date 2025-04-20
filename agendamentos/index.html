@@ -229,12 +229,12 @@
   <script>
     // Registro do Service Worker
     if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/service-worker.js')
-          .then(reg => console.log('Service Worker registrado:', reg))
-          .catch(err => console.error('Erro ao registrar Service Worker:', err));
-      });
-    }
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/cantinho-do-pet/service-worker.js')
+        .then(reg => console.log('✅ Service Worker registrado!'))
+        .catch(err => console.log('❌ Erro no Service Worker:', err));
+    });
+  }
 
     // Configuração inicial dos eventos
     document.addEventListener('DOMContentLoaded', function() {

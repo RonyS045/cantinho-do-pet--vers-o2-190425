@@ -538,28 +538,6 @@ window.editarAgendamento = async function(id) {
     }
 };
 
-let deferredPrompt;
-
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-  
-  // Mostrar botão de instalação (opcional)
-  const installBtn = document.createElement('button');
-  installBtn.textContent = 'Instalar App';
-  installBtn.className = 'btn btn-primary';
-  installBtn.addEventListener('click', () => {
-    deferredPrompt.prompt();
-    deferredPrompt.userChoice.then((choiceResult) => {
-      if (choiceResult.outcome === 'accepted') {
-        console.log('Usuário aceitou a instalação');
-      }
-      deferredPrompt = null;
-    });
-  });
-  document.body.appendChild(installBtn);
-});
-
 // CONTROLE PARA O MODO ESCURO
 
 async function atualizarInterface() {
@@ -583,3 +561,26 @@ async function atualizarInterface() {
         mostrarAlerta('Erro!', 'Não foi possível carregar os agendamentos', 'error');
     }
 }
+
+
+// No final do app.js
+let deferredPrompt;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  
+  const installBtn = document.createElement('button');
+  installBtn.textContent = '📲 Instalar App';
+  installBtn.className = 'install-btn';
+  installBtn.onclick = () => {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then((choice) => {
+      if (choice.outcome === 'accepted') {
+        console.log('Usuário instalou o app!');
+      }
+      deferredPrompt = null;
+    });
+  };
+  document.body.appendChild(installBtn);
+});
