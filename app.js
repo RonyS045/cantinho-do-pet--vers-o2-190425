@@ -537,3 +537,25 @@ window.editarAgendamento = async function(id) {
         mostrarAlerta('Erro!', 'Não foi possível carregar o agendamento para edição', 'error');
     }
 };
+
+let deferredPrompt;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  
+  // Mostrar botão de instalação (opcional)
+  const installBtn = document.createElement('button');
+  installBtn.textContent = 'Instalar App';
+  installBtn.className = 'btn btn-primary';
+  installBtn.addEventListener('click', () => {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then((choiceResult) => {
+      if (choiceResult.outcome === 'accepted') {
+        console.log('Usuário aceitou a instalação');
+      }
+      deferredPrompt = null;
+    });
+  });
+  document.body.appendChild(installBtn);
+});
