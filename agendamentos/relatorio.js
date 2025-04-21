@@ -1,10 +1,12 @@
 /**
  * relatorio.js - Geração de Relatórios PDF para Cantinho do Pet
- * Versão corrigida e otimizada para produção
- * Últimas atualizações:
- * - Correção na geração de relatórios
- * - Valores editáveis por serviço
- * - Formatação profissional
+ * Versão corrigida e atualizada
+ * 
+ * Correções implementadas:
+ * - Corrigido problema de geração de relatório
+ * - Adicionados todos os campos do agendamento
+ * - Melhor formatação dos dados
+ * - Validação de dados antes da geração
  */
 
 // Configurações do relatório
@@ -38,7 +40,7 @@ async function gerarRelatorioPDF() {
         console.log('Iniciando geração de relatório...');
         const agendamentos = await carregarAgendamentosFormatados();
         
-        if (agendamentos.length === 0) {
+        if (!agendamentos || agendamentos.length === 0) {
             await mostrarAlertaSemDados();
             return;
         }
@@ -78,13 +80,60 @@ async function carregarAgendamentosFormatados() {
         return agendamentos.map(ag => ({
             ...ag,
             dataFormatada: formatarData(ag.data),
+            valorBaseFormatado: (ag.valorBase || 0).toFixed(2),
             valorFormatado: ag.valor.toFixed(2),
-            servicosFormatados: formatarServicosParaRelatorio(ag.servicos, ag.valoresServicos || [])
+            servicosFormatados: formatarServicosParaRelatorio(ag.servicos, ag.valoresServicos || []),
+            petFormatado: formatarPetParaRelatorio(ag.pet),
+            tipoServicoFormatado: formatarTipoServico(ag.tipoServico),
+            porteFormatado: formatarPorte(ag.portePet)
         }));
     } catch (error) {
         console.error('Erro ao formatar agendamentos:', error);
         return [];
     }
+}
+
+/**
+ * Formata os dados do pet para o relatório
+ * @param {Object} pet - Objeto com informações do pet
+ * @returns {string} Texto formatado
+ */
+function formatarPetParaRelatorio(pet) {
+    let infoPet = `${pet.nome} (${pet.tipo})`;
+    if (pet.raca) infoPet += `, ${pet.raca}`;
+    infoPet += `, ${pet.peso}kg`;
+    return infoPet;
+}
+
+/**
+ * Formata o tipo de serviço para exibição
+ * @param {string} tipoServico - Tipo do serviço
+ * @returns {string} Texto formatado
+ */
+function formatarTipoServico(tipoServico) {
+    const tipos = {
+        'banho': 'Banho',
+        'tosa': 'Tosa',
+        'banho-tosa': 'Banho + Tosa',
+        'vacinacao': 'Vacinação',
+        'consulta': 'Consulta',
+        'outro': 'Outro'
+    };
+    return tipos[tipoServico] || tipoServico;
+}
+
+/**
+ * Formata o porte do pet para exibição
+ * @param {string} porte - Porte do pet
+ * @returns {string} Texto formatado
+ */
+function formatarPorte(porte) {
+    const portes = {
+        'pequeno': 'Pequeno',
+        'medio': 'Médio',
+        'grande': 'Grande'
+    };
+    return portes[porte] || porte;
 }
 
 /**
@@ -124,21 +173,68 @@ function calcularTotais(agendamentos) {
     try {
         const totalAgendamentos = agendamentos.length;
         const totalValor = agendamentos.reduce((sum, a) => sum + parseFloat(a.valor), 0);
+        const totalValorBase = agendamentos.reduce((sum, a) => sum + parseFloat(a.valorBase || 0), 0);
         const servicosCount = contarServicos(agendamentos);
+        const petsCount = contarPets(agendamentos);
+        const tiposServicoCount = contarTiposServico(agendamentos);
         
         return {
             totalAgendamentos,
             totalValor,
-            servicosCount
+            totalValorBase,
+            servicosCount,
+            petsCount,
+            tiposServicoCount
         };
     } catch (error) {
         console.error('Erro ao calcular totais:', error);
         return {
             totalAgendamentos: 0,
             totalValor: 0,
-            servicosCount: {}
+            totalValorBase: 0,
+            servicosCount: {},
+            petsCount: {},
+            tiposServicoCount: {}
         };
     }
+}
+
+/**
+ * Conta a ocorrência de cada tipo de pet
+ * @param {Array} agendamentos - Lista de agendamentos
+ * @returns {Object} Contagem de tipos de pets
+ */
+function contarPets(agendamentos) {
+    const contagem = {};
+    
+    agendamentos.forEach(agendamento => {
+        const tipo = agendamento.pet.tipo;
+        contagem[tipo] = (contagem[tipo] || 0) + 1;
+    });
+    
+    return Object.entries(contagem).sort((a, b) => b[1] - a[1]).reduce((obj, [key, value]) => {
+        obj[key] = value;
+        return obj;
+    }, {});
+}
+
+/**
+ * Conta a ocorrência de cada tipo de serviço principal
+ * @param {Array} agendamentos - Lista de agendamentos
+ * @returns {Object} Contagem de tipos de serviço
+ */
+function contarTiposServico(agendamentos) {
+    const contagem = {};
+    
+    agendamentos.forEach(agendamento => {
+        const tipo = formatarTipoServico(agendamento.tipoServico);
+        contagem[tipo] = (contagem[tipo] || 0) + 1;
+    });
+    
+    return Object.entries(contagem).sort((a, b) => b[1] - a[1]).reduce((obj, [key, value]) => {
+        obj[key] = value;
+        return obj;
+    }, {});
 }
 
 /**
@@ -228,14 +324,18 @@ async function gerarCorpo(doc, agendamentos) {
         // Configuração das colunas
         const columns = [
             { title: "Cliente", dataKey: "nome" },
+            { title: "Pet", dataKey: "petFormatado" },
+            { title: "Serviço", dataKey: "tipoServicoFormatado" },
+            { title: "Porte", dataKey: "porteFormatado" },
             { title: "Data", dataKey: "dataFormatada" },
             { title: "Horário", dataKey: "hora" },
             { 
-                title: "Serviços (com valores)", 
+                title: "Serviços Adicionais", 
                 dataKey: "servicosFormatados",
                 cellStyle: { fontStyle: 'normal', fontSize: 9 }
             },
-            { title: "Valor Total (R$)", dataKey: "valorFormatado" }
+            { title: "Valor Base", dataKey: "valorBaseFormatado" },
+            { title: "Total", dataKey: "valorFormatado" }
         ];
         
         // Opções da tabela
@@ -253,11 +353,15 @@ async function gerarCorpo(doc, agendamentos) {
                 fillColor: tabela.cores.linhaAlternada
             },
             columnStyles: {
-                nome: { cellWidth: 30, font: fontes.corpo.estilo },
+                nome: { cellWidth: 25, font: fontes.corpo.estilo },
+                petFormatado: { cellWidth: 30, font: fontes.corpo.estilo, fontSize: 9 },
+                tipoServicoFormatado: { cellWidth: 20, font: fontes.corpo.estilo },
+                porteFormatado: { cellWidth: 15, font: fontes.corpo.estilo },
                 dataFormatada: { cellWidth: 20, font: fontes.corpo.estilo },
                 hora: { cellWidth: 15, font: fontes.corpo.estilo },
-                servicosFormatados: { cellWidth: 80, font: fontes.corpo.estilo },
-                valorFormatado: { cellWidth: 25, font: fontes.corpo.estilo }
+                servicosFormatados: { cellWidth: 50, font: fontes.corpo.estilo },
+                valorBaseFormatado: { cellWidth: 20, font: fontes.corpo.estilo },
+                valorFormatado: { cellWidth: 20, font: fontes.corpo.estilo }
             },
             didDrawPage: function(data) {
                 adicionarTotaisAposTabela(doc, data, totais, tabela, fontes);
@@ -290,17 +394,46 @@ function adicionarTotaisAposTabela(doc, data, totais, tabelaConfig, fontesConfig
             doc.setTextColor(...RELATORIO_CONFIG.cabecalho.corPrimaria);
             
             doc.text(`Total de Agendamentos: ${totais.totalAgendamentos}`, tabelaConfig.margem, finalY);
-            doc.text(`Valor Total: R$ ${totais.totalValor.toFixed(2)}`, tabelaConfig.margem, finalY + 7);
+            doc.text(`Valor Base Total: R$ ${totais.totalValorBase.toFixed(2)}`, tabelaConfig.margem, finalY + 7);
+            doc.text(`Valor Total: R$ ${totais.totalValor.toFixed(2)}`, tabelaConfig.margem, finalY + 14);
             
             // Serviços mais solicitados
-            doc.text('Serviços mais solicitados:', tabelaConfig.margem, finalY + 21);
+            doc.text('Serviços Principais:', tabelaConfig.margem, finalY + 28);
             
             doc.setFont(fontesConfig.corpo.estilo, fontesConfig.corpo.peso);
             doc.setFontSize(10);
             
-            let yOffset = finalY + 28;
+            let yOffset = finalY + 35;
+            Object.entries(totais.tiposServicoCount).forEach(([servico, count]) => {
+                doc.text(`- ${servico}: ${count}x`, tabelaConfig.margem + 5, yOffset);
+                yOffset += 5;
+            });
+            
+            // Serviços adicionais mais solicitados
+            doc.setFont(fontesConfig.titulo.estilo, fontesConfig.titulo.peso);
+            doc.setFontSize(12);
+            doc.text('Serviços Adicionais:', tabelaConfig.margem, yOffset + 10);
+            
+            doc.setFont(fontesConfig.corpo.estilo, fontesConfig.corpo.peso);
+            doc.setFontSize(10);
+            
+            yOffset += 17;
             Object.entries(totais.servicosCount).slice(0, 5).forEach(([servico, count]) => {
                 doc.text(`- ${servico}: ${count}x`, tabelaConfig.margem + 5, yOffset);
+                yOffset += 5;
+            });
+            
+            // Tipos de pets atendidos
+            doc.setFont(fontesConfig.titulo.estilo, fontesConfig.titulo.peso);
+            doc.setFontSize(12);
+            doc.text('Tipos de Pets Atendidos:', tabelaConfig.margem, yOffset + 10);
+            
+            doc.setFont(fontesConfig.corpo.estilo, fontesConfig.corpo.peso);
+            doc.setFontSize(10);
+            
+            yOffset += 17;
+            Object.entries(totais.petsCount).forEach(([tipo, count]) => {
+                doc.text(`- ${tipo}: ${count}x`, tabelaConfig.margem + 5, yOffset);
                 yOffset += 5;
             });
         }

@@ -1,8 +1,8 @@
 // Versão do cache - atualize para forçar nova instalação
-const CACHE_VERSION = 'v5';
+const CACHE_VERSION = 'v6';
 const CACHE_NAME = `cantinho-do-pet-${CACHE_VERSION}`;
 
-// Assets para cache inicial
+// Assets para cache inicial (precache)
 const PRECACHE_ASSETS = [
   '/',
   '/index.html',
@@ -15,22 +15,39 @@ const PRECACHE_ASSETS = [
   '/icons/icon-192.png',
   '/icons/icon-512.png',
   '/assets/logo/WhatsApp Image 2025-04-18 at 15.16.34.jpeg',
-  '/assets/dev-logo.png',
+  '/assets/logo/frogCircular2025-03-31 at 13.21.17.jpeg',
   
-  // CDNs externas
-  'https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@400;500;600;700&display=swap',
+  // CDNs externas (cache apenas para recursos essenciais)
+  'https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&display=swap',
   'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css',
   'https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.8/main.min.css',
-  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'
+  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css',
+  'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js',
+  'https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js',
+  'https://cdn.jsdelivr.net/npm/sweetalert2@11',
+  'https://cdn.jsdelivr.net/npm/localforage@1.10.0/dist/localforage.min.js',
+  'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js',
+  'https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js'
 ];
 
-// Estratégia: Cache First, falling back to network
-const cacheFirst = async (request) => {
+// Estratégia: Cache First com atualização em background
+const cacheFirstWithUpdate = async (request) => {
   const cachedResponse = await caches.match(request);
+  
+  // Sempre faz fetch em background para atualizar cache
+  if (navigator.onLine) {
+    fetch(request).then(async (response) => {
+      if (response.ok) {
+        const cache = await caches.open(CACHE_NAME);
+        await cache.put(request, response.clone());
+      }
+    }).catch(() => {});
+  }
+  
   return cachedResponse || fetch(request);
 };
 
-// Estratégia: Network First, falling back to cache
+// Estratégia: Network First com fallback para cache
 const networkFirst = async (request) => {
   try {
     const networkResponse = await fetch(request);
@@ -47,43 +64,35 @@ const networkFirst = async (request) => {
   }
 };
 
-// Instalação do Service Worker
+// ========== INSTALAÇÃO ========== //
 self.addEventListener('install', (event) => {
   event.waitUntil(
     (async () => {
       const cache = await caches.open(CACHE_NAME);
-      console.log(`[Service Worker] Cache ${CACHE_NAME} aberto`);
+      console.log(`[Service Worker] Cache ${CACHE_NAME} criado`);
       
-      // Adiciona apenas os assets essenciais inicialmente
+      // Cache apenas os assets essenciais inicialmente
       const assetsToCache = PRECACHE_ASSETS.filter(asset => 
         !asset.startsWith('http') || 
         asset.includes('fonts.googleapis.com') ||
-        asset.includes('cdn.jsdelivr.net/bootstrap') ||
-        asset.includes('cdnjs.cloudflare.com/font-awesome')
+        asset.includes('cdn.jsdelivr.net') ||
+        asset.includes('cdnjs.cloudflare.com')
       );
       
       try {
         await cache.addAll(assetsToCache);
-        console.log('[Service Worker] Assets pré-cacheados');
+        console.log('[Service Worker] Assets pré-cacheados com sucesso');
       } catch (error) {
         console.error('[Service Worker] Falha ao cachear alguns assets:', error);
       }
       
-      // Pula a espera para ativação imediata
+      // Ativação imediata
       self.skipWaiting();
     })()
   );
 });
 
-
-const ASSETS = [
-  '/cantinho-do-pet/agendamentos/',
-  '/cantinho-do-pet/agendamentos/index.html',
-  // ... outros caminhos absolutos
-];
-
-
-// Ativação do Service Worker
+// ========== ATIVAÇÃO ========== //
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     (async () => {
@@ -91,7 +100,7 @@ self.addEventListener('activate', (event) => {
       const cacheKeys = await caches.keys();
       await Promise.all(
         cacheKeys.map((key) => {
-          if (key !== CACHE_NAME) {
+          if (key !== CACHE_NAME && key.startsWith('cantinho-do-pet-')) {
             console.log('[Service Worker] Removendo cache antigo:', key);
             return caches.delete(key);
           }
@@ -105,12 +114,12 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Interceptação de requisições
+// ========== INTERCEPTAÇÃO DE REQUISIÇÕES ========== //
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // Ignora requisições que não são GET ou de outros tipos
+  // Ignora requisições que não são GET
   if (request.method !== 'GET') return;
   
   // Ignora requisições de extensões do navegador
@@ -122,13 +131,13 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Assets estáticos - Cache First
+  // Assets estáticos - Cache First com atualização
   if (
     PRECACHE_ASSETS.some(asset => url.pathname === asset) ||
     url.pathname.startsWith('/assets/') ||
     url.pathname.startsWith('/icons/')
   ) {
-    event.respondWith(cacheFirst(request));
+    event.respondWith(cacheFirstWithUpdate(request));
     return;
   }
 
@@ -139,24 +148,7 @@ self.addEventListener('fetch', (event) => {
     url.hostname.includes('cdnjs.cloudflare.com') ||
     url.hostname.includes('fonts.gstatic.com')
   ) {
-    event.respondWith(
-      (async () => {
-        // Retorna do cache imediatamente
-        const cachedResponse = await caches.match(request);
-        
-        // Atualiza o cache em background se online
-        if (navigator.onLine) {
-          fetch(request).then(async (response) => {
-            if (response.ok) {
-              const cache = await caches.open(CACHE_NAME);
-              await cache.put(request, response);
-            }
-          }).catch(e => console.log('Background sync failed:', e));
-        }
-        
-        return cachedResponse || fetch(request);
-      })()
-    );
+    event.respondWith(cacheFirstWithUpdate(request));
     return;
   }
 
@@ -164,18 +156,53 @@ self.addEventListener('fetch', (event) => {
   event.respondWith(networkFirst(request));
 });
 
-// Mensagens para atualização em background
+// ========== MENSAGENS PARA ATUALIZAÇÃO ========== //
 self.addEventListener('message', (event) => {
   if (event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
   }
+  
+  if (event.data.type === 'GET_CACHE_VERSION') {
+    event.ports[0].postMessage({ version: CACHE_VERSION });
+  }
 });
 
-// Tratamento de erros global
-self.addEventListener('error', (event) => {
-  console.error('[Service Worker] Error:', event.error);
+// ========== TRATAMENTO DE ERROS ========== //
+self.addEventListener('error', (error) => {
+  console.error('[Service Worker] Error:', error);
 });
 
 self.addEventListener('unhandledrejection', (event) => {
   console.error('[Service Worker] Unhandled Rejection:', event.reason);
+});
+
+// ========== SINCRONIZAÇÃO EM BACKGROUND ========== //
+self.addEventListener('sync', (event) => {
+  if (event.tag === 'syncAgendamentos') {
+    console.log('[Service Worker] Sincronização em background iniciada');
+    // Aqui você pode adicionar lógica para sincronizar dados quando a conexão voltar
+  }
+});
+
+// ========== NOTIFICAÇÕES ========== //
+self.addEventListener('push', (event) => {
+  const data = event.data.json();
+  const options = {
+    body: data.body,
+    icon: '/icons/icon-192.png',
+    badge: '/icons/icon-72.png',
+    vibrate: [200, 100, 200],
+    data: { url: data.url }
+  };
+  
+  event.waitUntil(
+    self.registration.showNotification(data.title, options)
+  );
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  event.waitUntil(
+    clients.openWindow(event.notification.data.url || '/')
+  );
 });
