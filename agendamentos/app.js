@@ -1,11 +1,11 @@
 /**
  * app.js - Sistema de Agendamentos Cantinho do Pet
- * Versão com modo claro/escuro
+ * Versão final para implantação
  * Últimas atualizações:
- * - Adição de tema claro/escuro
- * - Persistência de preferência de tema
- * - Integração com preferência do sistema
- * - Melhorias na organização do código
+ * - Implementação do tema claro/escuro
+ * - Melhorias no comprovante de agendamento
+ * - Otimização do código existente
+ * - Correção de bugs menores
  */
 
 // Variáveis globais
@@ -21,11 +21,11 @@ document.addEventListener('DOMContentLoaded', async function() {
     configurarFormulario();
     configurarEventosUI();
     configurarServicosMultiplos();
-    configurarTema(); // Nova função para configurar tema
+    configurarTema(); // Configura o sistema de temas
     await atualizarInterface();
 });
 
-// Configuração do tema claro/escuro
+// ========== CONFIGURAÇÃO DO TEMA ========== //
 function configurarTema() {
     const themeToggle = document.getElementById('theme-toggle');
     const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
@@ -68,7 +68,7 @@ function configurarTema() {
     });
 }
 
-// Inicializa o calendário FullCalendar
+// ========== CALENDÁRIO ========== //
 async function inicializarCalendario() {
     calendar = new FullCalendar.Calendar(document.getElementById('calendario'), {
         initialView: 'dayGridMonth',
@@ -82,12 +82,14 @@ async function inicializarCalendario() {
         events: await carregarAgendamentosParaCalendario(),
         eventClick: function(info) {
             editarAgendamento(parseInt(info.event.id));
-        }
+        },
+        eventBackgroundColor: 'var(--secondary-color)',
+        eventBorderColor: 'var(--secondary-color)'
     });
     calendar.render();
 }
 
-// Configura o formulário de agendamento
+// ========== FORMULÁRIO ========== //
 function configurarFormulario() {
     const form = document.getElementById('form-agendamento');
     
@@ -99,40 +101,40 @@ function configurarFormulario() {
             return;
         }
         
-        // Coletar todos os serviços e valores
         const servicos = Array.from(document.querySelectorAll('.servico-input'))
-            .map(input => input.value)
+            .map(input => input.value.trim())
             .filter(val => val);
             
         const valoresServicos = Array.from(document.querySelectorAll('.valor-servico'))
             .map(input => parseFloat(input.value))
             .filter(val => !isNaN(val));
 
-        if (servicos.length === 0) {
-            mostrarAlerta('Atenção!', 'Por favor, adicione pelo menos um serviço', 'warning');
+        if (servicos.length === 0 || servicos.length !== valoresServicos.length) {
+            mostrarAlerta('Atenção!', 'Por favor, verifique os serviços e valores informados', 'warning');
             return;
         }
 
         const agendamento = {
             id: editMode ? currentEditId : Date.now(),
-            nome: document.getElementById('nomeCliente').value,
+            nome: document.getElementById('nomeCliente').value.trim(),
             servicos: servicos,
             valoresServicos: valoresServicos,
             data: document.getElementById('data').value,
             hora: document.getElementById('horario').value,
             valor: parseFloat(document.getElementById('valor').value),
-            observacoes: document.getElementById('observacoes').value,
+            observacoes: document.getElementById('observacoes').value.trim(),
             dataCriacao: new Date().toISOString()
         };
 
         try {
             if (editMode) {
                 await atualizarAgendamento(agendamento);
+                mostrarAlerta('Sucesso!', 'Agendamento atualizado com sucesso', 'success');
             } else {
                 await salvarAgendamento(agendamento);
+                mostrarAlerta('Sucesso!', 'Agendamento confirmado com sucesso', 'success');
             }
             
-            mostrarAlerta('Sucesso!', 'Agendamento confirmado com sucesso', 'success');
             await atualizarInterface();
             form.reset();
             sairModoEdicao();
@@ -142,14 +144,14 @@ function configurarFormulario() {
             
         } catch (error) {
             console.error('Erro no formulário:', error);
-            if (error.message.includes('horário')) {
-                mostrarAlerta('Erro!', error.message, 'error');
-            }
+            mostrarAlerta('Erro!', error.message.includes('horário') 
+                ? error.message 
+                : 'Ocorreu um erro ao processar o agendamento', 'error');
         }
     });
 }
 
-// Configura eventos de UI
+// ========== CONFIGURAÇÃO DE EVENTOS ========== //
 function configurarEventosUI() {
     // Botão de confirmação de exclusão
     document.getElementById('confirmDelete').addEventListener('click', async function() {
@@ -174,7 +176,7 @@ function configurarEventosUI() {
     document.getElementById('share-whatsapp').addEventListener('click', compartilharAgendamentoAtual);
 }
 
-// Configura múltiplos serviços com valores editáveis
+// ========== SERVIÇOS MÚLTIPLOS ========== //
 function configurarServicosMultiplos() {
     const container = document.getElementById('servicos-container');
     const addBtn = document.getElementById('add-servico');
@@ -193,7 +195,6 @@ function configurarServicosMultiplos() {
         atualizarBotoesRemover();
     });
 
-    // Configura eventos para os serviços
     container.addEventListener('input', function(e) {
         if (e.target.classList.contains('servico-input') || e.target.classList.contains('valor-servico')) {
             calcularValorTotal();
@@ -209,7 +210,6 @@ function configurarServicosMultiplos() {
     });
 }
 
-// Atualiza o estado dos botões de remover serviço
 function atualizarBotoesRemover() {
     const botoes = document.querySelectorAll('.remove-servico');
     botoes.forEach((btn, index) => {
@@ -217,28 +217,27 @@ function atualizarBotoesRemover() {
     });
 }
 
-// Calcula o valor total baseado nos serviços
 function calcularValorTotal() {
-    const servicosInputs = Array.from(document.querySelectorAll('.servico-input'));
     const valoresInputs = Array.from(document.querySelectorAll('.valor-servico'));
-    
     let total = 0;
-    servicosInputs.forEach((input, index) => {
-        if (input.value && valoresInputs[index].value) {
-            total += parseFloat(valoresInputs[index].value) || 0;
+    
+    valoresInputs.forEach(input => {
+        if (input.value) {
+            total += parseFloat(input.value) || 0;
         }
     });
     
     document.getElementById('valor').value = total.toFixed(2);
 }
 
-// Funções de CRUD
+// ========== OPERAÇÕES CRUD ========== //
 async function carregarAgendamentos() {
     try {
         const dados = await localforage.getItem('agendamentos');
         return dados ? dados : [];
     } catch (error) {
         console.error('Erro ao carregar agendamentos:', error);
+        mostrarAlerta('Erro!', 'Não foi possível carregar os agendamentos', 'error');
         return [];
     }
 }
@@ -262,7 +261,7 @@ async function salvarAgendamento(novoAgendamento) {
     try {
         let agendamentos = await carregarAgendamentos();
         
-        // Verifica se já existe um agendamento com mesmo horário
+        // Verifica conflito de horário
         const conflito = agendamentos.some(ag => 
             ag.data === novoAgendamento.data && 
             ag.hora === novoAgendamento.hora &&
@@ -287,12 +286,24 @@ async function atualizarAgendamento(agendamentoAtualizado) {
         let agendamentos = await carregarAgendamentos();
         const index = agendamentos.findIndex(a => a.id === agendamentoAtualizado.id);
         
-        if (index !== -1) {
-            agendamentos[index] = agendamentoAtualizado;
-            await localforage.setItem('agendamentos', agendamentos);
-            return true;
+        if (index === -1) {
+            throw new Error('Agendamento não encontrado para atualização');
         }
-        return false;
+
+        // Verifica conflito de horário com outros agendamentos
+        const conflito = agendamentos.some((ag, i) => 
+            i !== index &&
+            ag.data === agendamentoAtualizado.data && 
+            ag.hora === agendamentoAtualizado.hora
+        );
+        
+        if (conflito) {
+            throw new Error('Já existe outro agendamento para este horário');
+        }
+
+        agendamentos[index] = agendamentoAtualizado;
+        await localforage.setItem('agendamentos', agendamentos);
+        return true;
     } catch (error) {
         console.error('Erro ao atualizar agendamento:', error);
         throw error;
@@ -302,6 +313,12 @@ async function atualizarAgendamento(agendamentoAtualizado) {
 async function excluirAgendamento(id) {
     try {
         let agendamentos = await carregarAgendamentos();
+        const novoTotal = agendamentos.filter(a => a.id !== id).length;
+        
+        if (agendamentos.length === novoTotal) {
+            throw new Error('Agendamento não encontrado para exclusão');
+        }
+
         agendamentos = agendamentos.filter(a => a.id !== id);
         await localforage.setItem('agendamentos', agendamentos);
         return true;
@@ -311,7 +328,7 @@ async function excluirAgendamento(id) {
     }
 }
 
-// Atualiza a interface do usuário
+// ========== ATUALIZAÇÃO DA INTERFACE ========== //
 async function atualizarInterface() {
     try {
         agendamentos = await carregarAgendamentos();
@@ -330,7 +347,6 @@ async function atualizarInterface() {
     }
 }
 
-// Cria um item da lista de agendamentos
 function criarItemLista(agendamento) {
     const servicosList = agendamento.servicos.map((s, i) => {
         const valor = agendamento.valoresServicos?.[i] || 0;
@@ -363,22 +379,103 @@ function criarItemLista(agendamento) {
     `;
 }
 
-// Formata data para exibição
+// ========== COMPROVANTE (ATUALIZADO) ========== //
+function mostrarComprovante(agendamento) {
+    const comprovanteModal = new bootstrap.Modal(document.getElementById('comprovanteModal'));
+    document.getElementById('comprovante-content').innerHTML = gerarComprovante(agendamento);
+    agendamentoAtual = agendamento;
+    comprovanteModal.show();
+}
+
+function gerarComprovante(agendamento) {
+    const servicosList = agendamento.servicos.map((s, i) => {
+        const valor = agendamento.valoresServicos?.[i] || 0;
+        return `<li><strong>${s}</strong> - <span class="valor-destaque">R$ ${valor.toFixed(2)}</span></li>`;
+    }).join('');
+    
+    const dataFormatada = formatarData(agendamento.data);
+    const dataEmissao = new Date().toLocaleDateString('pt-BR', { 
+        day: '2-digit', 
+        month: 'long', 
+        year: 'numeric' 
+    });
+    const horaEmissao = new Date().toLocaleTimeString('pt-BR', { 
+        hour: '2-digit', 
+        minute: '2-digit' 
+    });
+
+    return `
+        <div class="comprovante">
+            <div class="text-center">
+                <img src="/assets/logo/WhatsApp Image 2025-04-18 at 15.16.34.jpeg" alt="Logo Cantinho do Pet" class="mb-2">
+                <h4>Cantinho do Pet</h4>
+                <h5>COMPROVANTE DE AGENDAMENTO</h5>
+            </div>
+            
+            <div class="mb-3">
+                <h6>INFORMAÇÕES DO CLIENTE</h6>
+                <p><strong>Nome:</strong> ${agendamento.nome}</p>
+                <p><strong>Data do Agendamento:</strong> ${dataEmissao}</p>
+            </div>
+            
+            <div class="mb-3">
+                <h6>DETALHES DO SERVIÇO</h6>
+                <p><strong>Data:</strong> ${dataFormatada}</p>
+                <p><strong>Horário:</strong> ${agendamento.hora}</p>
+                
+                <h6 class="mt-3">SERVIÇOS CONTRATADOS</h6>
+                <ul>${servicosList}</ul>
+                
+                <p class="mt-3"><strong>Valor Total:</strong> <span class="valor-destaque">R$ ${agendamento.valor.toFixed(2)}</span></p>
+                
+                ${agendamento.observacoes ? `
+                <h6 class="mt-3">OBSERVAÇÕES</h6>
+                <p>${agendamento.observacoes}</p>
+                ` : ''}
+            </div>
+            
+            <div class="alert alert-light text-center mt-4">
+                <small>Comprovante gerado em ${dataEmissao} às ${horaEmissao}</small>
+            </div>
+        </div>
+    `;
+}
+
+function compartilharAgendamentoAtual() {
+    if (!agendamentoAtual) return;
+    compartilharWhatsApp(agendamentoAtual);
+}
+
+function compartilharWhatsApp(agendamento) {
+    const servicosText = agendamento.servicos.map((s, i) => {
+        const valor = agendamento.valoresServicos?.[i] || 0;
+        return `• ${s} - R$ ${valor.toFixed(2)}`;
+    }).join('%0A');
+    
+    const observacoesText = agendamento.observacoes ? `%0A%0A📝 *Observações:* ${agendamento.observacoes}` : '';
+    const dataFormatada = formatarData(agendamento.data);
+    
+    const texto = `✅ *AGENDAMENTO CONFIRMADO - CANTINHO DO PET* ✅%0A%0A` +
+                  `🐾 *Cliente:* ${agendamento.nome}%0A` +
+                  `📅 *Data:* ${dataFormatada}%0A` +
+                  `⏰ *Horário:* ${agendamento.hora}%0A` +
+                  `💼 *Serviços:*%0A${servicosText}%0A` +
+                  `💰 *Valor Total:* R$ ${agendamento.valor.toFixed(2)}${observacoesText}%0A%0A` +
+                  `_Agradecemos pela preferência! 🐶😸_`;
+    
+    window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`, '_blank');
+}
+
+// ========== FUNÇÕES AUXILIARES ========== //
 function formatarData(dataString) {
     const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
     return new Date(dataString).toLocaleDateString('pt-BR', options);
 }
 
-// Valida o formulário
 function validarFormulario() {
-    const camposObrigatorios = [
-        'nomeCliente',
-        'data',
-        'horario',
-        'valor'
-    ];
-
+    const camposObrigatorios = ['nomeCliente', 'data', 'horario', 'valor'];
     let valido = true;
+
     camposObrigatorios.forEach(id => {
         const campo = document.getElementById(id);
         if (!campo.value) {
@@ -391,7 +488,7 @@ function validarFormulario() {
 
     // Validação dos serviços
     const servicos = Array.from(document.querySelectorAll('.servico-input'))
-        .map(input => input.value)
+        .map(input => input.value.trim())
         .filter(val => val);
         
     const valores = Array.from(document.querySelectorAll('.valor-servico'))
@@ -410,7 +507,6 @@ function validarFormulario() {
     return valido;
 }
 
-// Mostra alerta usando SweetAlert2
 function mostrarAlerta(titulo, mensagem, tipo) {
     Swal.fire({
         title: titulo,
@@ -420,76 +516,7 @@ function mostrarAlerta(titulo, mensagem, tipo) {
     });
 }
 
-// Funções de comprovante
-function mostrarComprovante(agendamento) {
-    const comprovanteModal = new bootstrap.Modal(document.getElementById('comprovanteModal'));
-    document.getElementById('comprovante-content').innerHTML = gerarComprovante(agendamento);
-    agendamentoAtual = agendamento;
-    comprovanteModal.show();
-}
-
-function gerarComprovante(agendamento) {
-    const servicosList = agendamento.servicos.map((s, i) => {
-        const valor = agendamento.valoresServicos?.[i] || 0;
-        return `<li>${s} - R$ ${valor.toFixed(2)}</li>`;
-    }).join('');
-    
-    return `
-        <div class="comprovante">
-            <div class="text-center mb-4">
-                <img src="/assets/logo/WhatsApp Image 2025-04-18 at 15.16.34.jpeg" alt="Logo Cantinho do Pet" width="80" class="mb-2">
-                <h4 class="text-success">Cantinho do Pet</h4>
-                <h5 class="mb-3" style="color: var(--secondary-color);">COMPROVANTE DE AGENDAMENTO</h5>
-            </div>
-            
-            <div class="mb-3">
-                <h6>Informações do Cliente:</h6>
-                <p><strong>Nome:</strong> ${agendamento.nome}</p>
-                <p><strong>Data do Agendamento:</strong> ${new Date().toLocaleDateString('pt-BR')}</p>
-            </div>
-            
-            <div class="mb-3">
-                <h6>Detalhes do Agendamento:</h6>
-                <p><strong>Data:</strong> ${formatarData(agendamento.data)}</p>
-                <p><strong>Horário:</strong> ${agendamento.hora}</p>
-                <p><strong>Serviços:</strong></p>
-                <ul>${servicosList}</ul>
-                <p><strong>Valor Total:</strong> R$ ${agendamento.valor.toFixed(2)}</p>
-                ${agendamento.observacoes ? `<p><strong>Observações:</strong> ${agendamento.observacoes}</p>` : ''}
-            </div>
-            
-            <div class="alert alert-light mt-4">
-                <small>Este comprovante foi gerado automaticamente pelo sistema Cantinho do Pet.</small>
-            </div>
-        </div>
-    `;
-}
-
-function compartilharAgendamentoAtual() {
-    if (!agendamentoAtual) return;
-    compartilharWhatsApp(agendamentoAtual);
-}
-
-function compartilharWhatsApp(agendamento) {
-    const servicosText = agendamento.servicos.map((s, i) => {
-        const valor = agendamento.valoresServicos?.[i] || 0;
-        return `• ${s} - R$ ${valor.toFixed(2)}`;
-    }).join('%0A');
-    
-    const observacoesText = agendamento.observacoes ? `%0A%0A📝 *Observações:* ${agendamento.observacoes}` : '';
-    
-    const texto = `✅ *AGENDAMENTO CONFIRMADO - CANTINHO DO PET* ✅%0A%0A` +
-                  `🐾 *Cliente:* ${agendamento.nome}%0A` +
-                  `📅 *Data:* ${formatarData(agendamento.data)}%0A` +
-                  `⏰ *Horário:* ${agendamento.hora}%0A` +
-                  `💼 *Serviços:*%0A${servicosText}%0A` +
-                  `💰 *Valor Total:* R$ ${agendamento.valor.toFixed(2)}${observacoesText}%0A%0A` +
-                  `_Agradecemos pela preferência! 🐶😸_`;
-    
-    window.open(`https://wa.me/?text=${texto}`, '_blank');
-}
-
-// Funções de modo de edição
+// ========== MODO DE EDIÇÃO ========== //
 function entrarModoEdicao(agendamento) {
     editMode = true;
     currentEditId = agendamento.id;
@@ -501,7 +528,7 @@ function entrarModoEdicao(agendamento) {
     document.getElementById('valor').value = agendamento.valor.toFixed(2);
     document.getElementById('observacoes').value = agendamento.observacoes || '';
     
-    // Preencher serviços com valores
+    // Preencher serviços
     const servicosContainer = document.getElementById('servicos-container');
     servicosContainer.innerHTML = '';
     
@@ -522,13 +549,6 @@ function entrarModoEdicao(agendamento) {
     document.getElementById('form-title').textContent = 'Editar Agendamento';
     document.getElementById('cancel-edit').classList.remove('d-none');
     document.getElementById('form-agendamento').scrollIntoView({ behavior: 'smooth' });
-    
-    // Configurar eventos para os novos inputs
-    servicosContainer.addEventListener('input', function(e) {
-        if (e.target.classList.contains('servico-input') || e.target.classList.contains('valor-servico')) {
-            calcularValorTotal();
-        }
-    });
 }
 
 function sairModoEdicao() {
@@ -552,16 +572,9 @@ function sairModoEdicao() {
         </div>
     `;
     document.getElementById('valor').value = '';
-    
-    // Reconfigurar eventos
-    servicosContainer.addEventListener('input', function(e) {
-        if (e.target.classList.contains('servico-input') || e.target.classList.contains('valor-servico')) {
-            calcularValorTotal();
-        }
-    });
 }
 
-// Funções globais
+// ========== FUNÇÕES GLOBAIS ========== //
 window.prepararExclusao = function(id) {
     const confirmBtn = document.getElementById('confirmDelete');
     confirmBtn.dataset.idToDelete = id;
@@ -584,14 +597,13 @@ window.editarAgendamento = async function(id) {
     }
 };
 
-// Instalação PWA
+// ========== PWA INSTALL PROMPT ========== //
 let deferredPrompt;
 
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   deferredPrompt = e;
   
-  // Mostrar botão de instalação (opcional)
   const installBtn = document.createElement('button');
   installBtn.textContent = 'Instalar App';
   installBtn.className = 'btn btn-primary';
